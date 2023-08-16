@@ -12,7 +12,7 @@ Fun made project - Anonymus web chatting without logging in.
 
 ## Tech Stack
 
-**Client:** React.js TawilwindCss
+**Client:** React.js Tailwind Css
 
 **Server:** Node, Express, Sockets
 
