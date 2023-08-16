@@ -87,10 +87,6 @@ io.on("connection", (socket) => {
   });
 });
 
-setInterval(() => {
-  console.log(chatData);
-}, 1000);
-
 app.get("/checkRoom/:roomId/:username", (req, res) => {
   const { roomId, username } = req.params;
   if (roomId.length < 5 || roomId.length > 20) {

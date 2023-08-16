@@ -23,9 +23,9 @@ const MessageList = ({ messages, username }) => {
             }
 
             return (
-              <div key={`${username}_${index}`}>
+              <div key={`${username}_${index}`} className="flex flex-col self-start">
                 <div>{msg.username}</div>
-                <div className="flex items-center self-end rounded-xl rounded-tr bg-gray-600 py-2 px-3 text-white max-w-[500px]">
+                <div className=" rounded-xl rounded-tl bg-gray-600 py-2 px-3 text-white max-w-[500px]">
                   <p className="w-full break-words whitespace-pre-wrap">{msg.message}</p>
                 </div>
               </div>
