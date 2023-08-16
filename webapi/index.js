@@ -3,6 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
 const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 const server = http.createServer(app);
@@ -77,7 +78,14 @@ io.on("connection", (socket) => {
       chatData[socket.chatId].users = chatData[socket.chatId].users.filter((user) => user !== socket.username);
 
       if (chatData[socket.chatId].users.length === 0) {
-        return delete chatData[socket.chatId];
+        delete chatData[socket.chatId];
+
+        const newFileName = `./chats/${socket.chatId}_${uuidv4()}.txt`;
+        return fs.rename(`./chats/${socket.chatId}.txt`, newFileName, (err) => {
+          if (err) {
+            console.error("Error renaming file:", err);
+          }
+        });
       }
 
       io.to(socket.chatId).emit("infoMessage", { message: `${socket.username} has disconnected`, joined: false });
