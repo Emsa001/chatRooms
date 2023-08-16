@@ -7,7 +7,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-dark/dark.scss";
 
-const api = "http://localhost:5000"; //https://webchat.minereality.eu
+const api = "http://localhost:5555";
 
 const App = () => {
   const [socket, setSocket] = useState(null);

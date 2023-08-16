@@ -109,7 +109,7 @@ app.get("/checkRoom/:roomId/:username", (req, res) => {
   return res.json({ success: true });
 });
 
-const PORT = 5000;
+const PORT = 5555;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
