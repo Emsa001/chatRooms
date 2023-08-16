@@ -1,5 +1,5 @@
 
-# WebChat on socket
+# chatRooms based on sockets
 
 Fun made project - Anonymus web chatting without logging in.
 
