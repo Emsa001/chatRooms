@@ -71,20 +71,11 @@ const App = () => {
 
       socket.on("infoMessage", (data) => {
         setMessages((prevMessages) => [...prevMessages, { message: data.message, info: true, joined: data.joined }]);
+      });
 
-        const username = data?.message?.split(" ")[0];
-
-        let users_local = users;
-        if (data.joined) {
-          users_local.push(username);
-        } else {
-          const indexToRemove = users_local.indexOf(username);
-          if (indexToRemove !== -1) {
-            users_local.splice(indexToRemove, 1);
-          }
-        }
-
-        setUsers(users_local);
+      socket.on("userList", (data) => {
+        setUsers(data.users);
+        console.log(data);
       });
     }
   }, [socket]);

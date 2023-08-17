@@ -35,20 +35,16 @@ const chatData = {};
 io.on("connection", (socket) => {
   socket.on("joinChat", (data) => {
     try {
-      const { chatId, username } = data;
+      const { roomId, username } = data;
 
-      socket.join(chatId);
-      io.to(chatId).emit("infoMessage", { message: `${username} has joined the chat`, joined: true });
+      socket.join(roomId);
+      io.to(roomId).emit("infoMessage", { message: `${username} has joined the chat`, joined: true });
 
-      if (!chatData[chatId]) {
-        chatData[chatId] = {
-          users: [],
-        };
-      }
+      chatData[roomId]?.users?.push(username);
 
-      chatData[chatId].users.push(username);
+      io.to(roomId).emit("userList", { users: chatData[roomId]?.users });
       socket.username = username;
-      socket.chatId = chatId;
+      socket.roomId = roomId;
     } catch (err) {
       console.error(err);
     }
@@ -56,11 +52,11 @@ io.on("connection", (socket) => {
 
   socket.on("newMessage", (data) => {
     try {
-      const { chatId, message, username } = data;
+      const { roomId, message, username } = data;
 
-      io.to(chatId).emit("incomingMessage", { message, username });
+      io.to(roomId).emit("incomingMessage", { message, username });
 
-      const filePath = `./chats/${chatId}.txt`;
+      const filePath = `./chats/${roomId}.txt`;
       const messageToAppend = `[${new Date().toISOString()}] ${username}: ${message}\n`;
 
       fs.appendFile(filePath, messageToAppend, (err) => {
@@ -75,20 +71,21 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     try {
-      chatData[socket.chatId].users = chatData[socket.chatId].users.filter((user) => user !== socket.username);
+      chatData[socket.roomId].users = chatData[socket.roomId].users.filter((user) => user !== socket.username);
 
-      if (chatData[socket.chatId].users.length === 0) {
-        delete chatData[socket.chatId];
+      if (chatData[socket.roomId].users.length === 0) {
+        delete chatData[socket.roomId];
 
-        const newFileName = `./chats/${socket.chatId}_${uuidv4()}.txt`;
-        return fs.rename(`./chats/${socket.chatId}.txt`, newFileName, (err) => {
+        const newFileName = `./chats/${socket.roomId}_${uuidv4()}.txt`;
+        return fs.rename(`./chats/${socket.roomId}.txt`, newFileName, (err) => {
           if (err) {
             console.error("Error renaming file:", err);
           }
         });
       }
 
-      io.to(socket.chatId).emit("infoMessage", { message: `${socket.username} has disconnected`, joined: false });
+      io.to(socket.roomId).emit("infoMessage", { message: `${socket.username} has disconnected`, joined: false });
+      io.to(socket.roomId).emit("userList", { users: chatData[socket.roomId].users });
     } catch (err) {
       console.error(err);
     }
@@ -114,18 +111,18 @@ app.post("/checkRoom", (req, res) => {
     return res.json({ error: "Username contains illegal characters" });
   }
 
-  if (chatData[roomId] && chatData[roomId].users.includes(username)) {
+  if (!chatData[roomId]) {
+    chatData[roomId] = {
+      users: [],
+    };
+  }
+
+  if (chatData[roomId] && chatData[roomId]?.users?.includes(username)) {
     return res.json({ error: "Username unavailable" });
   }
 
   if (chatData[roomId]?.users?.length >= 20) {
     return res.json({ error: "Room is full" });
-  }
-
-  if (!chatData[roomId]) {
-    chatData[roomId] = {
-      users: [],
-    };
   }
 
   return res.json({ success: true });
