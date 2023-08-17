@@ -1,0 +1,2 @@
+[2023-08-17T21:53:25.479Z] Emsa001: www.google.com
+[2023-08-17T21:53:29.911Z] Emsa001: https://google.com

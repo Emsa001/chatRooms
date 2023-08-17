@@ -6,13 +6,15 @@ import axios from "axios";
 
 import Swal from "sweetalert2";
 import "@sweetalert2/theme-dark/dark.scss";
+import ConnectedUsers from "./components/ConnectedUsers";
 
 const api = "http://localhost:5555";
 
 const App = () => {
   const [socket, setSocket] = useState(null);
-  const [chatId, setChatId] = useState(null);
+  const [roomId, setroomId] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const [username, setUsername] = useState("");
 
@@ -30,14 +32,13 @@ const App = () => {
         const user = document.getElementById("username").value;
         const roomId = document.getElementById("roomId").value;
 
-        const rawData = await axios.get(`${api}/checkRoom/${roomId}/${user}`);
-        console.log(api);
+        const rawData = await axios.post(`${api}/checkRoom`, { roomId, username: user });
         if (rawData.data.error) {
           return Swal.showValidationMessage(rawData.data.error);
         }
 
         setUsername(user);
-        setChatId(roomId);
+        setroomId(roomId);
 
         return [roomId, user];
       },
@@ -55,7 +56,7 @@ const App = () => {
   const sendMessage = (message) => {
     try {
       if (socket) {
-        socket.emit("newMessage", { chatId, message, username });
+        socket.emit("newMessage", { roomId, message, username });
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -70,6 +71,20 @@ const App = () => {
 
       socket.on("infoMessage", (data) => {
         setMessages((prevMessages) => [...prevMessages, { message: data.message, info: true, joined: data.joined }]);
+
+        const username = data?.message?.split(" ")[0];
+
+        let users_local = users;
+        if (data.joined) {
+          users_local.push(username);
+        } else {
+          const indexToRemove = users_local.indexOf(username);
+          if (indexToRemove !== -1) {
+            users_local.splice(indexToRemove, 1);
+          }
+        }
+
+        setUsers(users_local);
       });
     }
   }, [socket]);
@@ -85,18 +100,25 @@ const App = () => {
       });
       setSocket(newSocket);
 
-      console.log(user);
-      newSocket.emit("joinChat", { chatId: roomId, username: user });
+      newSocket.emit("joinChat", { roomId: roomId, username: user });
       setMessages([]);
     }
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen flex flex-col items-center text-white pt-10">
-      <h1 className="text-3xl mb-4">Room ID: {chatId}</h1>
+    <div className="bg-gray-900 min-h-screen text-white pt-10">
+      <h1 className="text-3xl text-center mb-4">Room ID: {roomId}</h1>
 
-      <MessageList messages={messages} username={username} />
-      <MessageInput sendMessage={sendMessage} />
+      <div className="flex flex-col md:flex-row px-5">
+        <div className="w-1/3"></div>
+        <div className="w-full ">
+          <MessageList messages={messages} username={username} />
+          <MessageInput sendMessage={sendMessage} />
+        </div>
+        <div className="w-1/3">
+          <ConnectedUsers users={users} />
+        </div>
+      </div>
     </div>
   );
 };

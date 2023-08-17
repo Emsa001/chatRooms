@@ -2,7 +2,7 @@ import React from "react";
 
 const MessageList = ({ messages, username }) => {
   return (
-    <div className="flex h-[80vh] flex-col bg-gray-800 rounded-3xl w-11/12 md:w-5/12">
+    <div className="flex h-[80vh] flex-col bg-gray-800 rounded-3xl">
       <div className="flex-grow overflow-y-auto">
         <div className="flex flex-col space-y-2 p-4">
           {messages.map((msg, index) => {

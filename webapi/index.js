@@ -3,6 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
 const fs = require("fs");
+const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
@@ -17,18 +18,19 @@ if (!fs.existsSync(chatDirectory)) {
 
 // Enable CORS for all origins
 app.use(cors());
+app.use(bodyParser.json());
 
 app.use((req, res, next) => {
   const referer = req.headers.referer || "";
 
-  if (referer.startsWith("https://www.yourwebsite.com")) {
+  if (referer.startsWith("http://localhost:3000")) {
     next();
   } else {
     res.status(403).send("Forbidden");
   }
 });
 
-const chatData = {}; // This object will hold both connected users and chat rooms
+const chatData = {};
 
 io.on("connection", (socket) => {
   socket.on("joinChat", (data) => {
@@ -47,7 +49,6 @@ io.on("connection", (socket) => {
       chatData[chatId].users.push(username);
       socket.username = username;
       socket.chatId = chatId;
-      //chatData[chatId].messages.push(`${username} has joined the chat`);
     } catch (err) {
       console.error(err);
     }
@@ -57,7 +58,6 @@ io.on("connection", (socket) => {
     try {
       const { chatId, message, username } = data;
 
-      //chatData[chatId].messages.push(`[${new Date().toISOString()}] ${username}: ${message}`);
       io.to(chatId).emit("incomingMessage", { message, username });
 
       const filePath = `./chats/${chatId}.txt`;
@@ -95,8 +95,14 @@ io.on("connection", (socket) => {
   });
 });
 
-app.get("/checkRoom/:roomId/:username", (req, res) => {
-  const { roomId, username } = req.params;
+app.post("/checkRoom", (req, res) => {
+  const { roomId, username } = req.body;
+  const format = /[ `@#$%^&*()+\-=\[\]{};':"\\|,.\/?~]/;
+
+  if (format.test(roomId)) {
+    return res.json({ error: "RoomId contains illegal characters" });
+  }
+
   if (roomId.length < 5 || roomId.length > 20) {
     return res.json({ error: "RoomId must be at least 5 characters and maximum 20 characters length" });
   }
@@ -104,8 +110,16 @@ app.get("/checkRoom/:roomId/:username", (req, res) => {
     return res.json({ error: "Username must be at least 3 characters and maximum 16 characters length" });
   }
 
+  if (format.test(username)) {
+    return res.json({ error: "Username contains illegal characters" });
+  }
+
   if (chatData[roomId] && chatData[roomId].users.includes(username)) {
     return res.json({ error: "Username unavailable" });
+  }
+
+  if (chatData[roomId]?.users?.length >= 20) {
+    return res.json({ error: "Room is full" });
   }
 
   if (!chatData[roomId]) {
