@@ -107,15 +107,14 @@ const App = () => {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white pt-10">
-      <h1 className="text-3xl text-center mb-4">Room ID: {roomId}</h1>
-
       <div className="flex flex-col md:flex-row px-5">
-        <div className="w-1/3"></div>
-        <div className="w-full ">
+        <div className="w-0 xl:w-1/3"></div>
+        <div className="w-full">
+          <h1 className="text-3xl text-center mb-4">Room ID: {roomId}</h1>
           <MessageList messages={messages} username={username} />
           <MessageInput sendMessage={sendMessage} />
         </div>
-        <div className="w-1/3">
+        <div className="w-full md:w-1/3">
           <ConnectedUsers users={users} />
         </div>
       </div>
