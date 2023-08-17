@@ -97,7 +97,7 @@ const App = () => {
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen text-white pt-10">
+    <div className="bg-gray-900 min-h-screen text-white pt-10 py-3">
       <div className="flex flex-col md:flex-row px-5">
         <div className="w-0 xl:w-1/3"></div>
         <div className="w-full">
@@ -109,6 +109,12 @@ const App = () => {
           <ConnectedUsers users={users} />
         </div>
       </div>
+      <p className="text-center mt-5">
+        Made with ❤️ by Emanuel -{" "}
+        <a href="https://github.com/Emsa001/chatRooms" target="_blank">
+          Github Repo
+        </a>
+      </p>
     </div>
   );
 };
