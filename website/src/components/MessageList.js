@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 const MessageList = ({ messages, username }) => {
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div className="flex h-[80vh] flex-col bg-gray-800 rounded-3xl">
       <div className="flex-grow overflow-y-auto">
@@ -31,6 +41,7 @@ const MessageList = ({ messages, username }) => {
               </div>
             );
           })}
+          <div ref={messagesEndRef} />
         </div>
       </div>
     </div>
