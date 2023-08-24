@@ -23,7 +23,7 @@ const MessageInput = ({ sendMessage }) => {
   return (
     <div className="mt-4 mb-5">
       <form onSubmit={handleSendMessage} className="flex gap-3">
-        <input type="text" value={message} onChange={handleInputChange} className="w-full bg-gray-800 text-white p-2 rounded-lg" placeholder="Type your message..." />
+        <textarea type="text" value={message} onChange={handleInputChange} className="w-full bg-gray-800 text-white p-2 rounded-lg" placeholder="Type your message..." />
         <button type="submit" className="bg-blue-500 text-white px-4 py-3 rounded-lg">
           Send
         </button>
